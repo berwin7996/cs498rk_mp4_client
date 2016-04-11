@@ -1,0 +1,18 @@
+<div ng-controller='TaskController'>  
+  <h3>Task Details</h3> 
+  <div class="row">
+    <div class="columns small-12">
+      {{ responsetext }}
+      <a ng-href="#/edittask/{{curtaskid}}"><button class="button submit">Edit</button></a> 
+      <form name="form" >
+        
+        <h4>Name:</h4> {{ curtaskname }}<br>
+        <h4>Description:</h4> {{ curtaskdescription }} <br>
+        <h4>Deadline:</h4> {{ curtaskdeadline | date:'fullDate'}} <br>
+        <h4>Assigned User:</h4> <a ng-href="#/userlist/{{curtaskuser}}" ng-hide="!hasUser">{{ curtaskusername }}</a><span ng-hide="hasUser">{{ curtaskusername }}</span>
+        <br>
+        <h5>Completed</h5> {{ curtaskcompleted }}
+      </form>
+    </div>
+  </div>
+</div>

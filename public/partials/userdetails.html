@@ -1,0 +1,39 @@
+<div ng-controller='UsersController'>   
+  <h1>{{ curuser.name }}'s info</h1>
+
+  <h4>Current Tasks</h4>
+  <table class="hover">
+    <thead>
+      <tr>
+        <th width="200">Task</th>
+        <th width="150">Deadline</th>
+        <th width="150"></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr ng-repeat="task in curtasks"> <!-- ng-click="showtask(task)"> -->
+          <td><a ng-href="#/tasklist/{{task._id}}">{{task.name}}</a></td>
+          <td>{{task.deadline | date:'fullDate'}}</td>
+          <td><button class="button" ng-click="completeTask(task._id)">Complete</button></td>
+      </tr>
+    </tbody>
+  </table>
+  
+  <h4>Completed Tasks</h4>
+  <table class="hover">
+    <thead>
+      <tr>
+        <th width="200">Task</th>
+        <th width="150">Deadline</th>
+        <th width="150"><button class="button success" ng-click="showCompleted()">Show Completed</button></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr ng-repeat="task in comptasks"> <!-- ng-click="showtask(task)"> -->
+          <td><a ng-href="#/tasklist/{{task._id}}">{{task.name}}</a></td>
+          <td>{{task.deadline | date:'fullDate'}}</td>
+          <td><button class="button alert" ng-click="uncompleteTask(task._id)">Uncomplete</button></td>
+      </tr>
+    </tbody>
+  </table>
+</div>

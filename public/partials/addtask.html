@@ -1,0 +1,23 @@
+<div ng-controller='TaskController'>   
+  <div class="row">
+    <div class="columns small-12">
+      {{ responsetext }}
+      <form name="form" ng-submit="addTask()">
+        <label for="input"> </label>
+        Name: *<input type="text" ng-model="addtask_name" id="name" name="name" ng-required="true" /><br>
+        Description: <input type="text" ng-model="addtask_description" id="description" name="description"  /><br>
+        Deadline: *<input type="date" ng-model="addtask_deadline" ng-required="true" />
+        Assigned User: 
+        <select ng-model="addtask_assignedUser" ng-required="true">
+          <option value="unassigned">unassigned</option>
+          <option ng-repeat="user in users" value="{{user._id}}">{{user.name}}</option>
+        </select>
+
+
+
+        <button class="button submit" id="submit">Submit</button>
+
+      </form>
+    </div>
+  </div>
+</div>

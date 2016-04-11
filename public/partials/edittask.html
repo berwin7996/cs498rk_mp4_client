@@ -1,0 +1,33 @@
+<div ng-controller='TaskController'>  
+  <h3>Edit Task</h3> 
+  <div class="row">
+    <div class="columns small-12">
+      {{ responsetext }}
+      <form name="form" ng-submit="editTask()">
+        Name: *<input type="text" ng-model="curtaskname" id="name" name="name" ng-required="true"/>
+        Description: <input type="text" ng-model="curtaskdescription" id="description" name="description"/>
+        Deadline: *<input type="date" ng-model="curtaskdeadline_date" ng-required="true" />
+        Assigned User: 
+
+        <select ng-model="curtaskuser" ng-options="user._id as user.name for user in users">
+          <option value="" ng-value="unassigned" name="unassigned">unassigned</option> 
+        </select>
+
+
+        <label>
+            <input type="radio" ng-model="curtaskcompleted" ng-value="true">
+            Completed
+          </label>
+          <label>
+            <input type="radio" ng-model="curtaskcompleted" ng-value="false">
+            Not Completed
+          </label>
+          
+        <button class="button submit" id="submit">Submit</button>
+
+      </form>
+
+    </div>
+    
+  </div>
+</div>

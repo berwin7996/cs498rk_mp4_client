@@ -1,0 +1,63 @@
+<div ng-controller='TaskController'>   
+  <table class="hover">
+    <thead>
+      <form name="taskListForm">
+        <tr>
+          <th width="200">
+            <div>
+              <label>
+                Completed:<br>
+                  <input type="radio" ng-model="filters.completed" value="pending">
+                  Pending
+                </label>
+                <label>
+                  <input type="radio" ng-model="filters.completed" value="completed">
+                  Completed
+                </label>
+                <label>
+                  <input type="radio" ng-model="filters.completed" value="all">
+                  All
+                </label>
+            </div></th>
+          <th width="150">
+            <div>
+              <label> Sort by: <br>
+              <select name="sortSelect" ng-model="filters.sortby">
+                <option value="name">Name</option>
+                <option value="username">Username</option>
+                <option value="dateCreated">Date Created</option>
+                <option value="deadline">Deadline</option>
+              </select>
+              <label>
+                Order:<br>
+                  <input type="radio" ng-model="filters.orderby" value="asc">
+                  Ascending
+                </label>
+                <label>
+                  <input type="radio" ng-model="filters.orderby" value="desc">
+                  Descending
+                </label>
+            </div></th>
+          <th width="150"></th>
+        </tr>
+        <tr>
+          <th width="150"><button ng-hide="paginatedLeft" class="button" ng-click="paginatePrev()">Previous</button></th>
+          <th width="150">Tasks {{ curskip + 1}} to {{ curskip + curlimit }}</th>
+          <th width="150"><button ng-hide="paginatedRight" class="button" ng-click="paginateNext()">Next</button></th>
+        </tr>
+        <tr>
+          <th>Name</th>
+          <th>Owner<br>Deadline</th>
+          <th><a ng-href="#/addtask"><button class="success button">Add Task</button></a></th>
+        </tr>
+      </form>
+    </thead>
+    <tbody>
+      <tr ng-repeat="task in tasks"> <!-- ng-click="showtask(task)"> -->
+          <td><a ng-href="#/tasklist/{{task._id}}">{{task.name}}</a></td>
+          <td>{{task.assignedUserName}}<br>{{task.deadline | date:'fullDate'}}</td>
+          <td><button class="alert button" ng-click="delete(task)">DELETE</button></td>
+      </tr>
+    </tbody>
+  </table>
+</div>

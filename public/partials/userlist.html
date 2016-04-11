@@ -1,0 +1,18 @@
+<div ng-controller='UsersController'>		
+  <table class="hover">
+    <thead>
+      <tr>
+        <th width="200">User</th>
+        <th width="150">Email</th>
+        <th width="150"><a ng-href="#/adduser"><button class="success button">Add User</button></a></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr ng-repeat="user in users"> <!-- ng-click="showUser(user)"> -->
+          <td><a ng-href="#/userlist/{{user._id}}">{{user.name}}</a></td>
+          <td>{{user.email}}</td>
+          <td><button class="alert button" ng-click="delete(user)">DELETE</button></td>
+      </tr>
+    </tbody>
+  </table>
+</div>

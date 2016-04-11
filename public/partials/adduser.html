@@ -1,0 +1,14 @@
+<div ng-controller='UsersController'>   
+  <div class="row">
+    <div class="columns small-12">
+      {{ responsetext }}
+      <form name="form" ng-submit="addUser()">
+        <label for="input"> </label>
+        Name: *<input type="text" ng-model="adduser_name" id="name" name="name" ng-required="true" /><br>
+        Email: *<input type="email" ng-pattern="/^[_a-z0-9]+(\.[_a-z0-9]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$/" ng-model="adduser_email" id="email" name="email" ng-required="true" /><br>
+        <button class="button submit" id="submit">Submit</button>
+
+      </form>
+    </div>
+  </div>
+</div>
