@@ -52,10 +52,12 @@ mp4Controllers.controller('TaskController', ['$scope', '$routeParams', '$http', 
       $scope.curtaskusername = task.assignedUserName;
       $scope.curtaskcompleted = task.completed;
 
-      UserID.get($scope.curtaskuser).then(function(user_data){
-        $scope.curtaskuserdata = user_data.data.data;
-      });
-
+      if ($scope.curtaskuser !== 'unassigned'){
+        UserID.get($scope.curtaskuser).then(function(user_data){
+          $scope.curtaskuserdata = user_data.data.data;
+        });  
+      }
+      
       if($scope.curtaskuser === 'unassigned'){
         $scope.hasUser = false;
       }
@@ -144,14 +146,19 @@ mp4Controllers.controller('TaskController', ['$scope', '$routeParams', '$http', 
     getQuery['skip'] = $scope.curskip;
     // console.log(getQuery);
 
+    console.log(getQuery);
+    getQuery['count'] = false;
+
     Tasks.get(getQuery).success(function(data){
       $scope.tasks = data.data;
       // next query gets count
       getQuery['count'] = 'true';
+      delete getQuery['limit'];
+      delete getQuery['skip'];
       // get the count which makes pagination possible
       Tasks.get(getQuery).success(function(data){
         $scope.curcount = data.count;
-        // console.log($scope.curcount);
+        console.log($scope.curcount);
       });
     });
 
@@ -164,33 +171,42 @@ mp4Controllers.controller('TaskController', ['$scope', '$routeParams', '$http', 
     task.description = $scope.addtask_description;
     task.deadline = $scope.addtask_deadline;
     task.assignedUser = $scope.addtask_assignedUser;
+    task.completed = false;
 
-    // since we can only get the userid from the form, find the username from iterating through $scope.users
-    for (var k = 0; k < $scope.users.length; k++) {
-      if ($scope.users[k]['_id'] === task.assignedUser) {
-        task.assignedUserName = $scope.users[k]['name'];
+    if (task.assignedUser === undefined) {
+      task.assignedUser = 'unassigned';
+      task.assignedUserName = 'unassigned';
+    }
+    else {
+      // since we can only get the userid from the form, find the username from iterating through $scope.users
+      for (var k = 0; k < $scope.users.length; k++) {
+        if ($scope.users[k]['_id'] === task.assignedUser) {
+          task.assignedUserName = $scope.users[k]['name'];
 
+        }
       }
     }
+    
     
     // clear inputs
     $scope.addtask_name = '';
     $scope.addtask_description = '';
-
+    console.log(task);
     Tasks.post(task).then(function(data){
       // on success
       // add the task to respective user
       var userid = data.data.data['assignedUser'];
       var taskid = data.data.data['_id'];
 
-      if (taskid){
+      console.log('hi');
+      if (userid !== 'unassigned'){
         UserID.get(userid).then(function(user) {
           console.log(user);
           user = user.data.data;
           UserID.put_frontend(userid, {'method':'push', 'pendingTasks' : taskid}).then(function(user_data){
             //success
             console.log(userid + ' has ' + taskid + 'added');
-            $scope.responsetext = 'Task added successfully';
+            $scope.responsetext = user_data.data.message;
 
           });
         });
@@ -210,6 +226,7 @@ mp4Controllers.controller('TaskController', ['$scope', '$routeParams', '$http', 
   // pagination, onyl be able to skip until we are at the end
   // only able to prev until the beginning
   $scope.paginateNext = function() {
+
     if ($scope.curskip + $scope.curlimit < $scope.curcount){
       $scope.curskip = $scope.curskip + $scope.curlimit;
       $scope.getTasks();
@@ -257,37 +274,46 @@ mp4Controllers.controller('TaskController', ['$scope', '$routeParams', '$http', 
         var olduser = {};
         UserID.get(userid).then(function(user) {
           olduser = user.data.data;
+
           // have to remove from old if userid is different
           UserID.get($scope.curtaskuser).then(function(user) {
             user = user.data.data;
-            if (!completed) {
-              if ($scope.curtaskuser_prev != $scope.curtaskuser){
-                console.log('changed user!!!')
-
-                UserID.put_frontend($scope.curtaskuser_prev, {'method':'pull', 'pendingTasks' : taskid, 'name' : olduser.name, 'email' : olduser.email}).then(function(user_data){
+            // if (!completed) {
+            if ($scope.curtaskuser_prev != $scope.curtaskuser){
+              console.log('changed user!!!')
+              if(task.completed){
+                UserID.put_frontend($scope.curtaskuser_prev, {'method':'pull', 'pendingTasks' : taskid}).then(function(user_data){
                   //success
-                  UserID.put_frontend($scope.curtaskuser, {'method':'push', 'pendingTasks' : taskid, 'name' : user.name, 'email' : user.email}).then(function(user_data){
-                    if (user_data.data.message === 'OK'){
-                      $scope.responsetext = 'Task was edited successfully';
-                    }
-                  }); 
+                  UserID.put_frontend($scope.curtaskuser, {'method':'pull', 'pendingTasks' : taskid}).then(function(user_data){
+                    //success
+                    $scope.responsetext = user_data.data.message;
+                  });
                 });
               }
               else{
-                UserID.put_frontend(userid, {'method':'push', 'pendingTasks' : taskid, 'name' : user.name, 'email' : user.email}).then(function(user_data){
-                  if (user_data.data.message === 'OK'){
-                    $scope.responsetext = 'Task was edited successfully';
-                  }
+                UserID.put_frontend($scope.curtaskuser_prev, {'method':'pull', 'pendingTasks' : taskid}).then(function(user_data){
+                  //success
+                  UserID.put_frontend($scope.curtaskuser, {'method':'push', 'pendingTasks' : taskid}).then(function(user_data){
+                    $scope.responsetext = user_data.data.message;
+                  }); 
                 });
               }
             }
-            else {
-              // if the task is completed, then we don't have to add to pending tasks
-              if ($scope.curtaskuser_prev != $scope.curtaskuser){
-                $scope.responsetext = 'Task was edited successfully';
+            else{
+              if(task.completed){
+                UserID.put_frontend(userid, {'method':'pull', 'pendingTasks' : taskid}).then(function(user_data){
+                  $scope.responsetext = user_data.data.message;
+                });
               }
-
+              else {
+                UserID.put_frontend(userid, {'method':'push', 'pendingTasks' : taskid}).then(function(user_data){
+                  $scope.responsetext = user_data.data.message;
+                });
+              }
             }
+            // }
+
+            
           })
         })
         
@@ -300,18 +326,19 @@ mp4Controllers.controller('TaskController', ['$scope', '$routeParams', '$http', 
     }
     else {
       TaskID.put($scope.curtaskid, task).then(function(data){
-
+        console.log('task edited');
         var userid = data.data.data['assignedUser'];
+        console.log(userid);
         var taskid = data.data.data['_id'];
         var olduser = {};
-        UserID.get(userid).then(function(user) {
-          olduser = user.data.data;
-          // have to remove from old if userid is different
+        // UserID.get(userid).then(function(user) {
+        //   olduser = user.data.data;
+        //   // have to remove from old if userid is different
           UserID.put_frontend($scope.curtaskuser_prev, {'method':'pull', 'pendingTasks' : taskid}).then(function(user_data){
             //success
-            $scope.responsetext = 'Task was edited successfully';
+            $scope.responsetext = user_data.data.message;
           });
-        })
+        // })
         
         
         
@@ -372,6 +399,23 @@ mp4Controllers.controller('TaskController', ['$scope', '$routeParams', '$http', 
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 mp4Controllers.controller('UsersController', ['$scope', '$routeParams', '$http', 'Users', 'UserID', 'Tasks', 'TaskID', '$window', '$location' , function($scope, $routeParams, $http, Users, UserID, Tasks, TaskID, $window, $location) {
   $scope.users = [];
   $scope.curuserid = $routeParams.id;
@@ -393,18 +437,19 @@ mp4Controllers.controller('UsersController', ['$scope', '$routeParams', '$http',
 
   $scope.getTasks = function(userid) {
     $scope.curtasks = [];
-    UserID.get(userid).then(function(data){
-      $scope.curuser = data.data.data;
+    if (userid !== 'unassigned'){
+      UserID.get(userid).then(function(data){
+        $scope.curuser = data.data.data;
 
-      // iterate to fill curtasks
-      for (var i = 0; i < $scope.curuser['pendingTasks'].length; i++) {
-        TaskID.get($scope.curuser['pendingTasks'][i]).then(function(task){
-          // success
-          $scope.curtasks.push(task.data.data);
-        });
-      }
-    })
-
+        // iterate to fill curtasks
+        for (var i = 0; i < $scope.curuser['pendingTasks'].length; i++) {
+          TaskID.get($scope.curuser['pendingTasks'][i]).then(function(task){
+            // success
+            $scope.curtasks.push(task.data.data);
+          });
+        }
+      });
+    }
   }
 
   /*
@@ -464,14 +509,17 @@ mp4Controllers.controller('UsersController', ['$scope', '$routeParams', '$http',
     TaskID.put(taskid, {'completed':true}).then(function(data) {
       console.log(data);
       // remove task from pending
-      UserID.get($scope.curuserid).then(function(user){
-        user = user.data.data;
-        UserID.put_frontend($scope.curuserid, {'pendingTasks' : taskid, 'method':'pull', 'name':user.name, 'email':user.email}).then(function(data) {
-          console.log(data);
-          $scope.getTasks($scope.curuserid);
+      if ($scope.curuserid !== 'unassigned'){
+        UserID.get($scope.curuserid).then(function(user){
+          user = user.data.data;
+          UserID.put_frontend($scope.curuserid, {'pendingTasks' : taskid, 'method':'pull'}).then(function(data) {
+            console.log(data);
+            $scope.getTasks($scope.curuserid);
 
+          });
         });
-      })
+      }
+      
     });
 
     
@@ -483,14 +531,17 @@ mp4Controllers.controller('UsersController', ['$scope', '$routeParams', '$http',
     TaskID.put(taskid, {'completed':false}).then(function(data) {
       console.log(data);
       // add task from pending
-      UserID.get($scope.curuserid).then(function(user){
-        user = user.data.data;
-        UserID.put_frontend($scope.curuserid, {'pendingTasks' : taskid, 'method':'push', 'name':user.name, 'email':user.email}).then(function(data) {
-          console.log(data);
-          $scope.getTasks($scope.curuserid);
-          $scope.showCompleted();
+      if ($scope.curuserid !== 'unassigned'){
+        UserID.get($scope.curuserid).then(function(user){
+          user = user.data.data;
+          UserID.put_frontend($scope.curuserid, {'pendingTasks' : taskid, 'method':'push'}).then(function(data) {
+            console.log(data);
+            $scope.getTasks($scope.curuserid);
+            $scope.showCompleted();
+          });
         });
-      })
+      }
+      
     });
 
     
