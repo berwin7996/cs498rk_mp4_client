@@ -14,7 +14,7 @@
       <tr ng-repeat="task in curtasks"> <!-- ng-click="showtask(task)"> -->
           <td><a ng-href="#/tasklist/{{task._id}}">{{task.name}}</a></td>
           <td>{{task.deadline | date:'fullDate'}}</td>
-          <td><button class="button" ng-click="completeTask(task._id)">Complete</button></td>
+          <td><button class="button" ng-click="completeTask(task)">Complete</button></td>
       </tr>
     </tbody>
   </table>

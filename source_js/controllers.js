@@ -505,16 +505,24 @@ mp4Controllers.controller('UsersController', ['$scope', '$routeParams', '$http',
     $location.path('#/users/' + user._id);
   };
 
-  $scope.completeTask = function(taskid) {
-    TaskID.put(taskid, {'completed':true}).then(function(data) {
+  $scope.completeTask = function(task) {
+    task.completed = true;
+    TaskID.put(task._id, task).then(function(data) {
       console.log(data);
       // remove task from pending
-      if ($scope.curuserid !== 'unassigned'){
-        UserID.get($scope.curuserid).then(function(user){
+      var task = data.data.data;
+      if (task.assignedUser !== 'unassigned'){
+        UserID.get(task.assignedUser).then(function(user){
           user = user.data.data;
-          UserID.put_frontend($scope.curuserid, {'pendingTasks' : taskid, 'method':'pull'}).then(function(data) {
-            console.log(data);
-            $scope.getTasks($scope.curuserid);
+          var index = user.pendingTasks.indexOf(task._id);
+          console.log(user.pendingTasks);
+          console.log(index);
+          user.pendingTasks.splice(index, 1);
+          console.log(user.pendingTasks);
+          console.log(user);
+          UserID.put(user._id, user).then(function(data) {
+            // console.log(data.data.pendingTasks);
+            $scope.getTasks(user._id);
 
           });
         });
@@ -526,15 +534,15 @@ mp4Controllers.controller('UsersController', ['$scope', '$routeParams', '$http',
     
   };
 
-  $scope.uncompleteTask = function(taskid) {
-    console.log(taskid)
-    TaskID.put(taskid, {'completed':false}).then(function(data) {
-      console.log(data);
+  $scope.uncompleteTask = function(task) {
+    task.completed = false;
+    TaskID.put(task._id, task).then(function(data) {
       // add task from pending
       if ($scope.curuserid !== 'unassigned'){
         UserID.get($scope.curuserid).then(function(user){
           user = user.data.data;
-          UserID.put_frontend($scope.curuserid, {'pendingTasks' : taskid, 'method':'push'}).then(function(data) {
+          user.pendingTasks.push(task._id);
+          UserID.put($scope.curuserid, user).then(function(data) {
             console.log(data);
             $scope.getTasks($scope.curuserid);
             $scope.showCompleted();

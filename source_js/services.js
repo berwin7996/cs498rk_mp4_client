@@ -46,11 +46,11 @@ mp4Services.factory('UserID', function($http, $window) {
         },
         put : function(userid, param) {
             var baseUrl = $window.sessionStorage.baseurl;
-            console.log(param)
+            console.log(JSON.stringify(param))
             return $http({
                 method : 'PUT',
                 url : baseUrl+'/api/users/'+userid,
-                data : param,
+                data : JSON.stringify(param),
                 headers : {
                     'Content-Type': 'application/x-www-form-urlencoded'
                 }
@@ -110,7 +110,7 @@ mp4Services.factory('TaskID', function($http, $window) {
         },
         put : function(taskid, param) {
             var baseUrl = $window.sessionStorage.baseurl;
-            console.log(param);
+            // console.log(param);
             return $http({
                 method : 'PUT',
                 url : baseUrl+'/api/tasks/'+taskid,
