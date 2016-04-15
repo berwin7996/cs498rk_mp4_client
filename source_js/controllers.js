@@ -156,8 +156,10 @@ mp4Controllers.controller('TaskController', ['$scope', '$routeParams', '$http', 
       delete getQuery['limit'];
       delete getQuery['skip'];
       // get the count which makes pagination possible
+      console.log(getQuery);
       Tasks.get(getQuery).success(function(data){
-        $scope.curcount = data.count;
+        console.log(data.data);
+        $scope.curcount = data.data;
         console.log($scope.curcount);
       });
     });
