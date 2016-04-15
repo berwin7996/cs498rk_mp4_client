@@ -199,15 +199,17 @@ mp4Controllers.controller('TaskController', ['$scope', '$routeParams', '$http', 
       // add the task to respective user
       var userid = data.data.data['assignedUser'];
       var taskid = data.data.data['_id'];
+      var task = data.data.data;
 
       console.log('hi');
       if (userid !== 'unassigned'){
         UserID.get(userid).then(function(user) {
           console.log(user);
           user = user.data.data;
-          UserID.put_frontend(userid, {'method':'push', 'pendingTasks' : taskid}).then(function(user_data){
+          user.pendingTasks.push(task._id);
+          UserID.put(userid, user).then(function(user_data){
             //success
-            console.log(userid + ' has ' + taskid + 'added');
+            // console.log(userid + ' has ' + taskid + 'added');
             $scope.responsetext = user_data.data.message;
 
           });
@@ -381,8 +383,10 @@ mp4Controllers.controller('TaskController', ['$scope', '$routeParams', '$http', 
             if (userid !== 'unassigned'){
               UserID.get(userid).then(function(data) {
                 user = data.data.data;
+                var index = user.pendingTasks.indexOf(task._id);
+                user.pendingTasks.splice(index, 1);
                 // console.log(data);
-                UserID.put_frontend(userid, {'method': 'pull', 'pendingTasks' : task._id, 'name' : user.name, 'email': user.email}).then(function(user_data){
+                UserID.put(userid, user).then(function(user_data){
                   $scope.getTasks();
                   console.log('deleted a task!');
                 });
@@ -598,7 +602,10 @@ mp4Controllers.controller('UsersController', ['$scope', '$routeParams', '$http',
           console.log(tasks);
           for (var i = 0; i < tasks.length; i++){
             console.log(tasks[i]['_id']);
-            TaskID.put(tasks[i]['_id'], {'assignedUser' : 'unassigned', 'assignedUserName':'unassigned'}).then(function(task){
+            var task = tasks[i];
+            task.assignedUser = 'unassigned';
+            task.assignedUserName = 'unassigned';
+            TaskID.put(tasks[i]['_id'], task).then(function(task){
               console.log('removed user from task');
             }); 
           }

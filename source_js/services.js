@@ -56,18 +56,6 @@ mp4Services.factory('UserID', function($http, $window) {
                 }
             })
         },
-        put_frontend : function(userid, param) {
-            var baseUrl = $window.sessionStorage.baseurl;
-            console.log(param)
-            return $http({
-                method : 'PUT',
-                url : baseUrl+'/api/users/'+userid,
-                params : param,
-                headers : {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                }
-            })
-        },
         delete : function(userid) {
             var baseUrl = $window.sessionStorage.baseurl;
             return $http.delete(baseUrl+'/api/users/'+userid)
@@ -108,13 +96,14 @@ mp4Services.factory('TaskID', function($http, $window) {
             var baseUrl = $window.sessionStorage.baseurl;
             return $http.get(baseUrl+'/api/tasks/'+taskid)
         },
-        put : function(taskid, param) {
+        put : function(taskid, params) {
             var baseUrl = $window.sessionStorage.baseurl;
-            // console.log(param);
+            params = $.param(params)
+            console.log(params);
             return $http({
                 method : 'PUT',
                 url : baseUrl+'/api/tasks/'+taskid,
-                params : param,
+                data : params,
                 headers : {
                     'Content-Type': 'application/x-www-form-urlencoded'
                 }
