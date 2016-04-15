@@ -44,13 +44,13 @@ mp4Services.factory('UserID', function($http, $window) {
             var baseUrl = $window.sessionStorage.baseurl;
             return $http.get(baseUrl+'/api/users/'+userid)
         },
-        put : function(userid, param) {
+        put : function(userid, params) {
             var baseUrl = $window.sessionStorage.baseurl;
-            console.log(JSON.stringify(param))
+            console.log($.param(params))
             return $http({
                 method : 'PUT',
                 url : baseUrl+'/api/users/'+userid,
-                data : JSON.stringify(param),
+                data : $.param(params),
                 headers : {
                     'Content-Type': 'application/x-www-form-urlencoded'
                 }

@@ -32,7 +32,7 @@
       <tr ng-repeat="task in comptasks"> <!-- ng-click="showtask(task)"> -->
           <td><a ng-href="#/tasklist/{{task._id}}">{{task.name}}</a></td>
           <td>{{task.deadline | date:'fullDate'}}</td>
-          <td><button class="button alert" ng-click="uncompleteTask(task._id)">Uncomplete</button></td>
+          <td><button class="button alert" ng-click="uncompleteTask(task)">Uncomplete</button></td>
       </tr>
     </tbody>
   </table>

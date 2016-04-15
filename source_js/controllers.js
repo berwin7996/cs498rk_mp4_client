@@ -538,13 +538,17 @@ mp4Controllers.controller('UsersController', ['$scope', '$routeParams', '$http',
     task.completed = false;
     TaskID.put(task._id, task).then(function(data) {
       // add task from pending
-      if ($scope.curuserid !== 'unassigned'){
-        UserID.get($scope.curuserid).then(function(user){
+      var task = data.data.data
+      console.log(task);
+      if (task.assignedUser !== 'unassigned'){
+        UserID.get(task.assignedUser).then(function(user){
           user = user.data.data;
+          console.log(user.pendingTasks);
           user.pendingTasks.push(task._id);
-          UserID.put($scope.curuserid, user).then(function(data) {
+          console.log(user.pendingTasks);
+          UserID.put(user._id, user).then(function(data) {
             console.log(data);
-            $scope.getTasks($scope.curuserid);
+            $scope.getTasks(user._id);
             $scope.showCompleted();
           });
         });
