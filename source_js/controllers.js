@@ -241,6 +241,7 @@ mp4Controllers.controller('TaskController', ['$scope', '$routeParams', '$http', 
 
   $scope.editTask = function() {
     var task = {}
+    task._id = $scope.curtaskid;
     task.name = $scope.curtaskname;
     task.description = $scope.curtaskdescription;
     task.deadline = $scope.curtaskdeadline_date;
@@ -272,50 +273,62 @@ mp4Controllers.controller('TaskController', ['$scope', '$routeParams', '$http', 
         var completed = data.data.data['completed'];
 
         var olduser = {};
-        UserID.get(userid).then(function(user) {
+        UserID.get($scope.curtaskuser_prev).then(function(user) {
           olduser = user.data.data;
+          console.log('olduser');
+          console.log(olduser);
 
           // have to remove from old if userid is different
           UserID.get($scope.curtaskuser).then(function(user) {
-            user = user.data.data;
-            // if (!completed) {
-            if ($scope.curtaskuser_prev != $scope.curtaskuser){
-              console.log('changed user!!!')
+            curuser = user.data.data;
+            console.log('curuser');
+            console.log(curuser);
+
+            if (olduser._id !== curuser._id) {
+              console.log('changed user!!!');
               if(task.completed){
-                UserID.put_frontend($scope.curtaskuser_prev, {'method':'pull', 'pendingTasks' : taskid}).then(function(user_data){
+                var index = olduser.pendingTasks.indexOf(task._id);
+                olduser.pendingTasks.splice(index, 1);
+                var index = curuser.pendingTasks.indexOf(task._id);
+                curuser.pendingTasks.splice(index, 1);
+                UserID.put(olduser._id, olduser).then(function(user_data){
                   //success
-                  UserID.put_frontend($scope.curtaskuser, {'method':'pull', 'pendingTasks' : taskid}).then(function(user_data){
+                  UserID.put(curuser._id, curuser).then(function(user_data){
                     //success
                     $scope.responsetext = user_data.data.message;
                   });
                 });
               }
               else{
-                UserID.put_frontend($scope.curtaskuser_prev, {'method':'pull', 'pendingTasks' : taskid}).then(function(user_data){
+                // set to not complete
+                var index = olduser.pendingTasks.indexOf(task._id);
+                olduser.pendingTasks.splice(index, 1);
+                curuser.pendingTasks.push(task._id);
+                UserID.put(olduser._id, olduser).then(function(user_data){
                   //success
-                  UserID.put_frontend($scope.curtaskuser, {'method':'push', 'pendingTasks' : taskid}).then(function(user_data){
+                  UserID.put(curuser._id, curuser).then(function(user_data){
+                    //success
                     $scope.responsetext = user_data.data.message;
-                  }); 
+                  });
                 });
               }
             }
             else{
-              if(task.completed){
-                UserID.put_frontend(userid, {'method':'pull', 'pendingTasks' : taskid}).then(function(user_data){
+              console.log('didn\'t change user');
+              var index = olduser.pendingTasks.indexOf(task._id);
+              olduser.pendingTasks.splice(index, 1);
+              UserID.put(olduser._id, olduser).then(function(user_data){
+                //success
+                olduser.pendingTasks.push(task._id);
+                UserID.put(olduser._id, olduser).then(function(user_data){
                   $scope.responsetext = user_data.data.message;
-                });
-              }
-              else {
-                UserID.put_frontend(userid, {'method':'push', 'pendingTasks' : taskid}).then(function(user_data){
-                  $scope.responsetext = user_data.data.message;
-                });
-              }
+                }); 
+              });
             }
-            // }
-
+          
             
-          })
-        })
+          });
+        });
         
         
         
@@ -325,20 +338,22 @@ mp4Controllers.controller('TaskController', ['$scope', '$routeParams', '$http', 
       });
     }
     else {
-      TaskID.put($scope.curtaskid, task).then(function(data){
+      TaskID.put(task.assignedUser, task).then(function(data){
         console.log('task edited');
         var userid = data.data.data['assignedUser'];
         console.log(userid);
         var taskid = data.data.data['_id'];
         var olduser = {};
-        // UserID.get(userid).then(function(user) {
-        //   olduser = user.data.data;
-        //   // have to remove from old if userid is different
-          UserID.put_frontend($scope.curtaskuser_prev, {'method':'pull', 'pendingTasks' : taskid}).then(function(user_data){
+        UserID.get($scope.curtaskuser_prev).then(function(user) {
+          olduser = user.data.data;
+          var index = olduser.pendingTasks.indexOf(task._id);
+          olduser.pendingTasks.splice(index, 1);
+          // have to remove from old if userid is different
+          UserID.put($scope.curtaskuser_prev, olduser).then(function(user_data){
             //success
             $scope.responsetext = user_data.data.message;
           });
-        // })
+        });
         
         
         
